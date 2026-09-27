@@ -22,7 +22,7 @@
 📍 Bydgoszcz, Poland
 🎓 Engineer of Applied Computer Science - Politechnika Bydgoska (2021–2025)
 💼 Operation Analyst (L2/L3) - Quad Graphics (2022–present)
-🎯 Goal: Junior FullStack Developer
+🎯 Goal: Junior FullStack Developer / Junior Software Developer
 ```
 
 I'm passionate about building **fullstack web applications**, exploring **new technologies**, and getting deeper into the world of **AI**. I learn fast, write clean code, and ship projects on my own time to keep growing every day.
