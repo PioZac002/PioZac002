@@ -12,12 +12,12 @@
 
 <br>
 
-|  |  |
-|---|---|
-| **Now** | Operations Analyst (L2/L3) at **Quad Graphics**, since 09.2022 |
-| **Looking for** | Junior Full-stack / Software Developer role |
-| **Education** | B.Eng. in Applied Computer Science, Politechnika Bydgoska (2021-2025) |
-| **Location** | Bydgoszcz, Poland |
+<table>
+<tr><td width="150"><b>Now</b></td><td>Operations Analyst (L2/L3) at <b>Quad Graphics</b>, since 09.2022</td></tr>
+<tr><td><b>Looking for</b></td><td>Junior Full-stack / Software Developer role</td></tr>
+<tr><td><b>Education</b></td><td>B.Eng. in Applied Computer Science, Politechnika Bydgoska (2021-2025)</td></tr>
+<tr><td><b>Location</b></td><td>Bydgoszcz, Poland</td></tr>
+</table>
 
 By day I diagnose production **.NET** applications: I read the code, query the data in **SQL**, go through the logs and retrace user steps until it is clear whether the cause is the application, the infrastructure or the business logic itself. After hours I build **full-stack web apps** and deploy them myself, from Docker images to **Google Cloud Run**. I work with AI tools every day and pick up new technologies fast.
 
@@ -143,7 +143,7 @@ Bilingual (PL/EN) portfolio designed as an archival technical record form: exper
 
 <div align="center">
 
-<img src="https://streak-stats.demolab.com?user=PioZac002&theme=transparent&hide_border=true&ring=A78BFA&fire=A78BFA&currStreakLabel=A78BFA&sideLabels=8b949e&currStreakNum=8b949e&sideNums=8b949e&dates=6e7681" width="440" alt="GitHub streak stats" />
+<img src="https://streak-stats.demolab.com?user=PioZac002&hide_current_streak=true&theme=transparent&hide_border=true&ring=A78BFA&fire=A78BFA&currStreakLabel=A78BFA&sideLabels=8b949e&currStreakNum=8b949e&sideNums=8b949e&dates=6e7681" width="440" alt="GitHub streak stats" />
 
 <br><br>
 
