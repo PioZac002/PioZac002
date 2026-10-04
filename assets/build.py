@@ -426,7 +426,7 @@ def qualifications(theme):
     ly = y + 14 + len(COURSES) * 28
     c.line(X0, ly, X1, ly, stroke='rule')
     c.text(X0, ly + 28, 'Languages', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
-    c.text(X0 + 104, ly + 28, 'Polish · native     English · B2+/C1     German · A2', face='plate', size=13.5,
+    c.text(X0 + 104, ly + 28, 'Polish (native)  ·  English (B2+/C1)  ·  German (A2)', face='plate', size=13.5,
            fill='ink', weight=520)
     return c
 
