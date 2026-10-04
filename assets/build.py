@@ -401,7 +401,7 @@ COURSES = [('Agile Project Management - AgilePM® Foundation', 'Centrum Szkoleni
 
 
 def qualifications(theme):
-    h = 150 + len(COURSES) * 28 + 46
+    h = 170 + len(COURSES) * 28 + 52   # course rows start at 170; the languages line needs its own row below
     c = Card(h, theme, '§4 Qualifications: B.Eng. in Applied Computer Science, Politechnika Bydgoska, 09.2021 - 03.2025. '
                        'Courses: ' + '; '.join(f'{n} ({p})' for n, p in COURSES)
                        + '. Languages: Polish (native), English (B2+/C1), German (A2).')
