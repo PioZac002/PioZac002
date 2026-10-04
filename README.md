@@ -143,10 +143,6 @@ Bilingual (PL/EN) portfolio designed as an archival technical record form: exper
 
 <div align="center">
 
-<img src="https://streak-stats.demolab.com?user=PioZac002&hide_current_streak=true&theme=transparent&hide_border=true&ring=A78BFA&fire=A78BFA&currStreakLabel=A78BFA&sideLabels=8b949e&currStreakNum=8b949e&sideNums=8b949e&dates=6e7681" width="440" alt="GitHub streak stats" />
-
-<br><br>
-
 <img src="https://komarev.com/ghpvc/?username=PioZac002&color=a78bfa&style=flat-square&label=profile+views" alt="Profile views" />
 
 <sub>Bydgoszcz, Poland · open to opportunities</sub>
