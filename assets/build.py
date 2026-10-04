@@ -95,8 +95,8 @@ def embed_fonts(texts):
 class Card:
     """Collects SVG nodes and the text each font face has to cover."""
 
-    def __init__(self, height, theme, title):
-        self.h, self.theme, self.title = height, theme, title
+    def __init__(self, height, theme, title, w=W, perf=('l', 'r')):
+        self.h, self.theme, self.title, self.w, self.perf = height, theme, title, w, perf
         self.p = PALETTES[theme]
         self.nodes = []
         self.texts = {'plate': [], 'data': []}
@@ -166,20 +166,30 @@ class Card:
             self.text(x + w + 8, y + 15, qualifier, face='data', size=7.5, fill='amber', weight=700, upper=True, spacing=0.6)
         return total
 
-    def sheet(self, top_tear=False, bottom_tear=False):
-        """Paper, greenbar bands and the tractor-feed margins."""
-        p = self.p
-        out = [f'<rect width="{W}" height="{self.h}" fill="{p["paper"]}"/>']
-        for i, y in enumerate(range(0, self.h, 24)):
+    def sheet(self):
+        """Paper, greenbar bands, the tractor-feed margins and the fold.
+
+        Cards stack into one continuous sheet; GitHub leaves a few pixels between
+        images, so every card starts on a perforated fold and the gap reads as
+        the tear between two pages of continuous stock."""
+        p, w, h = self.p, self.w, self.h
+        left = PERF if 'l' in self.perf else 0
+        right = w - PERF if 'r' in self.perf else w
+        out = [f'<rect width="{w}" height="{h}" fill="{p["paper"]}"/>']
+        for i, y in enumerate(range(0, h, 24)):
             if i % 2:
-                out.append(f'<rect x="{PERF}" y="{y}" width="{W - 2*PERF}" height="24" fill="{p["band"]}" opacity="0.55"/>')
-        for x in (0, W - PERF):
-            out.append(f'<rect x="{x}" y="0" width="{PERF}" height="{self.h}" fill="{p["sunk"]}"/>')
-        for x in (PERF, W - PERF):
-            out.append(f'<line x1="{x}" y1="0" x2="{x}" y2="{self.h}" stroke="{p["rule"]}" stroke-dasharray="2 3"/>')
-        for y in range(13, self.h, 26):
-            for x in (13, W - 13):
-                out.append(f'<circle cx="{x}" cy="{y}" r="4.6" fill="{p["hole"]}" stroke="{p["hole_edge"]}"/>')
+                out.append(f'<rect x="{left}" y="{y}" width="{right - left}" height="24" fill="{p["band"]}" opacity="0.55"/>')
+        if 'l' in self.perf:
+            out.append(f'<rect x="0" y="0" width="{PERF}" height="{h}" fill="{p["sunk"]}"/>')
+            out.append(f'<line x1="{PERF}" y1="0" x2="{PERF}" y2="{h}" stroke="{p["rule"]}" stroke-dasharray="2 3"/>')
+        if 'r' in self.perf:
+            out.append(f'<rect x="{w - PERF}" y="0" width="{PERF}" height="{h}" fill="{p["sunk"]}"/>')
+            out.append(f'<line x1="{w - PERF}" y1="0" x2="{w - PERF}" y2="{h}" stroke="{p["rule"]}" stroke-dasharray="2 3"/>')
+        for y in range(13, h, 26):
+            for x, side in ((13, 'l'), (w - 13, 'r')):
+                if side in self.perf:
+                    out.append(f'<circle cx="{x}" cy="{y}" r="4.6" fill="{p["hole"]}" stroke="{p["hole_edge"]}"/>')
+        out.append(f'<line x1="0" y1="0.5" x2="{w}" y2="0.5" stroke="{p["rule2"]}" stroke-dasharray="1 3" opacity=".8"/>')
         return ''.join(out)
 
     def render(self):
@@ -199,7 +209,7 @@ text{{font-kerning:normal}}
 @media (prefers-reduced-motion:reduce){{*{{animation:none!important}}}}
 """
         body = ''.join(self.nodes)
-        return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {self.h}" width="{W}" height="{self.h}" '
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {self.w} {self.h}" width="{self.w}" height="{self.h}" '
                 f'role="img" aria-label="{escape(self.title)}"><title>{escape(self.title)}</title>'
                 f'<style>{style}</style>{self.sheet()}{body}</svg>')
 
@@ -320,10 +330,13 @@ PROJECTS = [
 
 
 def register_head(theme):
-    c = Card(78, theme, '§2 Construction: four deployed systems. Each row links to its live demo.')
+    c = Card(100, theme, '§2 Construction: four deployed systems. Each row links to its live demo. '
+                         'The demos run on free tiers, so the first visit can take up to a minute to wake up.')
     section_head(c, 40, '§2', 'Construction', aside='4 entries · click a row to open')
-    c.text(X0, 70, 'Entry', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
-    c.text(X1, 70, 'Deployment', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1, anchor='end')
+    c.text(X0, 72, 'Free-tier hosting: the first visit after a quiet spell can take up to a minute to wake up.',
+           face='plate', size=12.5, fill='ink3', weight=420)
+    c.text(X0, 94, 'Entry', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
+    c.text(X1, 94, 'Deployment', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1, anchor='end')
     return c
 
 
@@ -343,6 +356,78 @@ def project(theme, entry):
         x += c.chip(x, 74, item) + 6
     c.raw('</g>')
     c.stamp(X1 - 64, 52, 'Deployed', sub=host, kind='green', rotate=-5, size=12)
+    return c
+
+
+def arrow(c, x, y, kind='link'):
+    col = c.p['mark']
+    if kind == 'mail':
+        c.raw(f'<path d="M{x} {y-9} h12 v9 h-12 z M{x} {y-9} l6 5 l6 -5" fill="none" stroke="{col}" stroke-width="1.6"/>')
+    else:
+        c.raw(f'<path d="M{x:.1f} {y} l9 -9 M{x+2:.1f} {y-9} h7 v7" fill="none" stroke="{col}" stroke-width="2"/>')
+
+
+def cell(theme, w, index, count, label, value, sub, kind, title):
+    """One field of a strip of linked cells; the strip shares a single sheet."""
+    perf = tuple(side for side, on in (('l', index == 0), ('r', index == count - 1)) if on)
+    c = Card(76, theme, title, w=w, perf=perf)
+    x0 = PERF + 22 if 'l' in perf else 20
+    if index < count - 1:
+        c.line(w - 0.5, 12, w - 0.5, 64, stroke='rule2')
+    c.text(x0, 25, label, face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
+    c.text(x0, 49, value, face='plate', size=17, fill='ink', weight=780, wdth=108)
+    arrow(c, x0 + advance('plate', value, 17) * 1.1 + 10, 47, kind)
+    c.text(x0, 66, sub, face='data', size=8.5, fill='ink2', weight=500)
+    return c
+
+
+CHANNELS = [
+    ('Channel 01', 'Portfolio', 'piozac002.github.io/PortfolioPage', 'link'),
+    ('Channel 02', 'LinkedIn', 'in/piotr-zaćmiński', 'link'),
+    ('Channel 03', 'Email', 'piotrek.zacminski2002@gmail.com', 'mail'),
+]
+
+SOURCES = [('Source · E-01', 'TaskSystem', 'PioZac002/TaskSystemm'),
+           ('Source · E-02', 'BarberApp', 'PioZac002/BarberAppv2'),
+           ('Source · E-03', 'Hala 4', 'PioZac002/hala-4'),
+           ('Source · E-04', 'Portfolio', 'PioZac002/PortfolioPage')]
+
+COURSES = [('Agile Project Management - AgilePM® Foundation', 'Centrum Szkoleniowe ProcessTeam'),
+           ('Complete React, Next.js & TypeScript Projects Course 2025', 'Udemy · Jānis Smilga'),
+           ('MERN 2025 Edition - MongoDB, Express, React and NodeJS', 'Udemy · Jānis Smilga'),
+           ('NodeJS Tutorial and Projects Course', 'Udemy · Jānis Smilga'),
+           ('JavaScript Tutorial and Projects Course', 'Udemy · Jānis Smilga'),
+           ('HTML/CSS Tutorial and Projects Course', 'Udemy · Jānis Smilga')]
+
+
+def qualifications(theme):
+    h = 150 + len(COURSES) * 28 + 46
+    c = Card(h, theme, '§4 Qualifications: B.Eng. in Applied Computer Science, Politechnika Bydgoska, 09.2021 - 03.2025. '
+                       'Courses: ' + '; '.join(f'{n} ({p})' for n, p in COURSES)
+                       + '. Languages: Polish (native), English (B2+/C1), German (A2).')
+    section_head(c, 40, '§4', 'Qualifications', aside='degree · 6 courses · 3 languages')
+    c.raw('<g class="feed d1">')
+    c.rect(X0, 66, X1 - X0, 62, fill='paper', stroke='rule2')
+    c.text(X0 + 14, 88, 'Degree', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
+    c.text(X0 + 14, 112, 'B.Eng. in Applied Computer Science', face='plate', size=17, fill='ink', weight=760, wdth=105)
+    c.text(X1 - 14, 88, '09.2021 - 03.2025', face='data', size=9.5, fill='ink2', weight=600, anchor='end', spacing=0.4)
+    c.text(X1 - 14, 112, 'Politechnika Bydgoska', face='plate', size=14, fill='ink', weight=560, anchor='end')
+    c.raw('</g>')
+    y = 156
+    c.text(X0, y, 'Certifications & courses', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
+    for n, (name, provider) in enumerate(COURSES):
+        ry = y + 14 + n * 28
+        c.raw(f'<g class="feed d{min(n + 2, 8)}">')
+        c.line(X0, ry, X1, ry, stroke='rule')
+        c.raw(f'<path d="M{X0 + 2} {ry + 15} l3.5 3.5 l7 -8" fill="none" stroke="{c.p["green"]}" stroke-width="1.8"/>')
+        c.text(X0 + 22, ry + 19, name, face='plate', size=13.5, fill='ink', weight=480)
+        c.text(X1, ry + 19, provider, face='data', size=9, fill='ink2', weight=500, anchor='end')
+        c.raw('</g>')
+    ly = y + 14 + len(COURSES) * 28
+    c.line(X0, ly, X1, ly, stroke='rule')
+    c.text(X0, ly + 28, 'Languages', face='data', size=8.5, fill='ink3', weight=600, upper=True, spacing=1)
+    c.text(X0 + 104, ly + 28, 'Polish · native     English · B2+/C1     German · A2', face='plate', size=13.5,
+           fill='ink', weight=520)
     return c
 
 
@@ -402,13 +487,23 @@ def footer(theme):
 
 def main():
     out = HERE
-    builders = {'header': header, 'parity': parity, 'register': register_head, 'stack': stack, 'footer': footer}
+    builders = {'header': header, 'parity': parity, 'register': register_head, 'stack': stack,
+                'qualifications': qualifications, 'footer': footer}
     for theme in PALETTES:
         for name, build in builders.items():
             (out / f'{name}-{theme}.svg').write_text(build(theme).render())
         for entry in PROJECTS:
             slug = entry[1].lower().replace(' ', '')
             (out / f'project-{slug}-{theme}.svg').write_text(project(theme, entry).render())
+        for i, (label, value, sub, kind) in enumerate(CHANNELS):
+            card = cell(theme, W / len(CHANNELS), i, len(CHANNELS), label, value, sub, kind,
+                        f'{label}: {value}, {sub}')
+            (out / f'channel-{value.lower()}-{theme}.svg').write_text(card.render())
+        for i, (label, value, sub) in enumerate(SOURCES):
+            card = cell(theme, W / len(SOURCES), i, len(SOURCES), label, value, sub, 'link',
+                        f'{label}: source code of {value} on GitHub, {sub}')
+            slug = value.lower().replace(' ', '')
+            (out / f'source-{slug}-{theme}.svg').write_text(card.render())
     for f in sorted(out.glob('*.svg')):
         print(f'{f.name:34} {f.stat().st_size / 1024:6.1f} KB')
 
